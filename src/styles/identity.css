@@ -1,0 +1,485 @@
+/* ==========================================================================
+   HALLWAY IDENTITY: FRAMES & AURAS
+   ========================================================================== */
+
+/* Avatar shapes are now handled dynamically via clip-path in the Avatar component */
+
+.avatar-frame {
+  position: relative;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
+}
+
+/* PREMIUM AVATAR FRAMES */
+.frame-normal { 
+  background: var(--border-color); 
+  padding: 1.5px; 
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
+
+.frame-glass-morphism {
+  background: rgba(255, 255, 255, 0.1);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 
+    inset 0 0 20px rgba(255,255,255,0.1), 
+    0 8px 25px rgba(0,0,0,0.2),
+    0 0 0 1px rgba(255,255,255,0.05);
+}
+
+.frame-matrix-code {
+  background: linear-gradient(180deg, #022002 0%, #00ff00 50%, #022002 100%);
+  background-size: 100% 200%;
+  padding: 3px;
+  box-shadow: 
+    0 0 20px rgba(0, 255, 0, 0.4), 
+    inset 0 0 15px rgba(0, 255, 0, 0.3),
+    0 0 40px rgba(0, 255, 0, 0.1);
+  animation: matrixFlow 3s infinite linear;
+  position: relative;
+}
+
+.frame-matrix-code::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent, rgba(0, 255, 0, 0.2), transparent);
+  animation: matrixGlimmer 2s infinite ease-in-out;
+  pointer-events: none;
+}
+
+.frame-cyber-neon {
+  background: linear-gradient(45deg, #fdf001, #ff00ff, #00ffff, #fdf001);
+  background-size: 300% 300%;
+  padding: 3px;
+  box-shadow: 
+    0 0 25px rgba(255, 0, 255, 0.5),
+    0 0 50px rgba(0, 255, 255, 0.2);
+  animation: cyberShift 3s infinite linear;
+}
+
+.frame-ghibli-nature {
+  background: linear-gradient(135deg, #7bc96f, #d6e9c6, #239a3b);
+  padding: 3.5px;
+  box-shadow: 
+    0 6px 20px rgba(35, 154, 59, 0.3),
+    inset 0 0 10px rgba(255, 255, 255, 0.5);
+  border: 1px solid rgba(255,255,255,0.6);
+  animation: gentleBreeze 5s infinite alternate ease-in-out;
+}
+
+.frame-noir-cinema {
+  background: linear-gradient(to bottom, #666, #111, #000);
+  padding: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 
+    inset 0 0 15px rgba(0,0,0,0.9), 
+    0 15px 30px rgba(0,0,0,0.6);
+}
+
+.frame-gotham-gold {
+  background: linear-gradient(45deg, #111, #d4af37, #facc15, #111);
+  background-size: 300% 300%;
+  padding: 3.5px;
+  box-shadow: 
+    0 0 25px rgba(212, 175, 55, 0.4),
+    0 0 5px rgba(212, 175, 55, 0.2);
+  animation: gothamGleam 4s infinite linear;
+}
+
+.frame-spectral-prism {
+  background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8b00ff, #ff0000);
+  background-size: 400% 400%;
+  padding: 3px;
+  box-shadow: 
+    0 0 30px rgba(255,255,255,0.2),
+    0 0 60px rgba(255,255,255,0.1);
+  animation: prismShift 6s infinite linear;
+  position: relative;
+}
+
+.frame-spectral-prism::after {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  background: linear-gradient(135deg, rgba(255,255,255,0.5) 0%, transparent 50%, rgba(255,255,255,0.2) 100%);
+  pointer-events: none;
+}
+
+.frame-liquid-plasma {
+  background: linear-gradient(180deg, #6c5ce7, #a29bfe, #d63031);
+  background-size: 100% 200%;
+  padding: 4px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 
+    0 0 20px rgba(108, 92, 231, 0.5),
+    0 0 40px rgba(214, 48, 49, 0.3);
+  animation: plasmaShift 8s infinite alternate ease-in-out;
+}
+
+.frame-liquid-plasma::after {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(255,255,255,0.4), transparent);
+  animation: liquidFlow 3s infinite linear;
+}
+
+/* ANIMATIONS */
+@keyframes matrixFlow { 0% { background-position: 0 0; } 100% { background-position: 0 200%; } }
+@keyframes matrixGlimmer { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.8; } }
+@keyframes cyberShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes gentleBreeze { 0% { filter: brightness(1); } 100% { filter: brightness(1.2) saturate(1.4); } }
+@keyframes gothamGleam { 0% { background-position: 0% 0%; } 100% { background-position: 100% 100%; } }
+@keyframes prismShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+@keyframes plasmaShift { 0% { background-position: 0% 0%; } 100% { background-position: 0% 100%; } }
+@keyframes liquidFlow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes silkFloat { 0% { transform: scale(1); opacity: 0.8; } 100% { transform: scale(1.05); opacity: 1; } }
+@keyframes hyperPulse { 0% { box-shadow: 0 0 10px #00f2ff; } 50% { box-shadow: 0 0 30px #00f2ff, 0 0 50px rgba(0, 242, 255, 0.4); } 100% { box-shadow: 0 0 10px #00f2ff; } }
+
+.frame-ethereal-silk {
+  background: linear-gradient(135deg, #fff, #f0f0f0, #e0e0e0);
+  padding: 2.5px;
+  box-shadow: 0 0 20px rgba(255,255,255,0.4), inset 0 0 10px rgba(0,0,0,0.05);
+  animation: silkFloat 3s infinite alternate ease-in-out;
+}
+
+.frame-crimson-void {
+  background: linear-gradient(to bottom, #900, #300, #000);
+  padding: 3px;
+  box-shadow: 0 0 25px rgba(255,0,0,0.3), inset 0 0 15px rgba(0,0,0,0.8);
+  border: 1px solid rgba(255,0,0,0.2);
+}
+
+.frame-hyperdrive {
+  background: #00f2ff;
+  padding: 2px;
+  box-shadow: 0 0 20px #00f2ff;
+  animation: hyperPulse 1.5s infinite ease-in-out;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* SPECTRAL AURAS — Themed Backgrounds */
+.aura-container {
+  position: absolute; inset: 0;
+  overflow: hidden; z-index: -1;
+  pointer-events: none;
+}
+
+/* Base style for blending */
+.aura-container > div {
+  width: 100%; height: 100%;
+  mix-blend-mode: screen;
+}
+[data-mode="dark"] .aura-container > div {
+  mix-blend-mode: color-dodge;
+}
+
+.aura-matrix { 
+  background: radial-gradient(circle at 50% 10%, rgba(0,255,135,0.08), transparent 70%); 
+  filter: blur(80px);
+  animation: matrixAura 8s infinite alternate ease-in-out; 
+}
+.aura-cyberpunk { 
+  background: linear-gradient(135deg, rgba(253, 240, 1, 0.05), rgba(255, 0, 255, 0.08)); 
+  filter: blur(100px);
+  animation: cyberAura 12s infinite alternate ease-in-out;
+}
+.aura-ghibli { 
+  background: radial-gradient(circle at 30% 30%, rgba(198, 228, 139, 0.1), transparent 85%); 
+  filter: blur(120px); 
+  animation: ghibliAura 15s infinite alternate ease-in-out; 
+}
+.aura-noir { 
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.03) 0%, transparent 70%);
+  mix-blend-mode: overlay !important;
+  animation: noirAura 10s infinite alternate ease-in-out;
+}
+.aura-gotham { 
+  background: radial-gradient(circle at 50% 90%, rgba(212, 175, 55, 0.08), transparent 80%); 
+  filter: blur(90px);
+  animation: gothamAura 12s infinite alternate ease-in-out;
+}
+.aura-hoth { 
+  background: linear-gradient(to bottom, rgba(255,255,255,0.1), transparent 80%); 
+  filter: blur(100px); 
+  animation: ghibliAura 12s infinite alternate-reverse ease-in-out;
+}
+
+/* AVATAR INTERACTIVES */
+.avatar-shimmer {
+  background: linear-gradient(
+    135deg,
+    transparent 20%,
+    rgba(255, 255, 255, 0.15) 50%,
+    transparent 80%
+  );
+  background-size: 200% 200%;
+  animation: avatarGleam 6s infinite ease-in-out;
+}
+
+@keyframes avatarGleam {
+  0% { background-position: -150% -150%; }
+  50% { background-position: 50% 50%; }
+  100% { background-position: 250% 250%; }
+}
+
+.quantum-pulse {
+  animation: quantumPulse 2s infinite ease-in-out;
+}
+
+@keyframes quantumPulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--accent-color-rgb), 0.4); }
+  70% { transform: scale(1.02); box-shadow: 0 0 0 10px rgba(var(--accent-color-rgb), 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(var(--accent-color-rgb), 0); }
+}
+
+/* Theme Selection Overhaul */
+.theme-opt {
+  position: relative;
+  overflow: hidden;
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.05) !important;
+  background-color: rgba(255, 255, 255, 0.03) !important;
+  transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1) !important;
+}
+
+.theme-opt::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: inherit;
+  opacity: 0.1;
+  transition: opacity 0.4s ease;
+}
+
+.theme-opt:hover {
+  transform: translateY(-2px) scale(1.02);
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.2) !important;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}
+
+.theme-opt.active-opt {
+  border: 1px solid var(--accent-color) !important;
+  background-color: rgba(var(--accent-color-rgb), 0.15) !important;
+  animation: themeActivePulse 2s infinite ease-in-out;
+}
+
+.theme-opt.active-opt::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  border: 1px solid var(--accent-color);
+  opacity: 0.5;
+  filter: blur(4px);
+}
+
+@keyframes themeActivePulse {
+  0% { box-shadow: 0 0 0 0 rgba(var(--accent-color-rgb), 0.4); }
+  70% { box-shadow: 0 0 0 10px rgba(var(--accent-color-rgb), 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--accent-color-rgb), 0); }
+}
+
+@keyframes matrixAura { 0% { opacity: 0.6; transform: scale(1); } 100% { opacity: 1; transform: scale(1.05); } }
+@keyframes cyberAura { 0% { opacity: 0.5; filter: hue-rotate(0deg); } 100% { opacity: 1; filter: hue-rotate(30deg); } }
+@keyframes ghibliAura { 0% { transform: translate(0, 0) scale(1); } 100% { transform: translate(20px, -10px) scale(1.1); } }
+@keyframes noirAura { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+@keyframes gothamAura { 0% { opacity: 0.4; } 100% { opacity: 0.8; filter: drop-shadow(0 0 10px rgba(250,204,21,0.5)); } }
+
+/* ==========================================================================
+   IDENTITY DATA & STAT BOXES
+   ========================================================================== */
+
+.stat-box {
+  padding: 12px 20px;
+  background: rgba(var(--bg-secondary-rgb), 0.3);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 90px;
+  transition: all 0.4s cubic-bezier(0.19, 1, 0.22, 1);
+  cursor: pointer;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(to right, transparent, rgba(255,255,255,0.1), transparent);
+}
+
+.stat-box:hover {
+  background: rgba(var(--bg-secondary-rgb), 0.5);
+  transform: translateY(-5px);
+  border-color: rgba(var(--accent-color-rgb), 0.4);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.stat-label {
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: 1.5px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.stat-value {
+  font-size: 18px;
+  font-weight: 900;
+  color: var(--text-primary);
+  font-family: 'Space Grotesk', sans-serif;
+}
+
+/* SYNC INDICATOR ANIMATION */
+.sync-indicator-glow {
+  position: relative;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--accent-color);
+  box-shadow: 0 0 20px var(--accent-color);
+  animation: identitySyncPulse 3s infinite ease-in-out;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes identitySyncPulse {
+  0%, 100% { transform: scale(1); opacity: 0.8; box-shadow: 0 0 10px var(--accent-color); }
+  50% { transform: scale(1.15); opacity: 1; box-shadow: 0 0 25px var(--accent-color); }
+}
+
+@keyframes cinematicBreathe {
+  0% { transform: scale(1.05) translate(0, 0); }
+  100% { transform: scale(1.1) translate(-1%, -1%); }
+}
+
+.parallax-banner-container {
+  position: absolute;
+  inset: -10%;
+  will-change: transform;
+  transition: transform 0.1s ease-out;
+}
+
+/* ==========================================================================
+   PREMIUM NEW AVATAR FRAMES & GLOW EFFECTS
+   ========================================================================== */
+
+/* 1. Cyber Radar: Neon rotating radar line overlay */
+.frame-cyber-radar {
+  background: linear-gradient(45deg, #00ff66, #00f2ff);
+  padding: 3.5px;
+  box-shadow: 
+    0 0 25px rgba(0, 255, 102, 0.4),
+    0 0 10px rgba(0, 242, 255, 0.2);
+  position: relative;
+  overflow: hidden;
+}
+.frame-cyber-radar::before {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: conic-gradient(from 0deg, transparent, rgba(0, 255, 102, 0.6), transparent 60%);
+  animation: liquidFlow 2s infinite linear;
+}
+
+/* 2. Stellar Nova: Bright cosmic burst pulse */
+.frame-stellar-nova {
+  background: linear-gradient(135deg, #ffd700, #ff007a, #00f2ff);
+  background-size: 300% 300%;
+  padding: 4px;
+  animation: cyberShift 4s infinite alternate ease-in-out;
+  box-shadow: 
+    0 0 30px rgba(255, 0, 122, 0.5),
+    0 0 60px rgba(0, 242, 255, 0.2);
+}
+
+/* 3. Deep Sea: Wave animation gradient */
+.frame-deep-sea {
+  background: linear-gradient(180deg, #0f2027, #203a43, #2c5364);
+  background-size: 100% 300%;
+  padding: 3.5px;
+  box-shadow: 
+    0 8px 25px rgba(15, 32, 39, 0.5),
+    0 0 15px rgba(44, 83, 100, 0.3);
+  animation: plasmaShift 6s infinite alternate ease-in-out;
+}
+.frame-deep-sea::before {
+  content: "";
+  position: absolute;
+  top: -50%; left: -50%; width: 200%; height: 200%;
+  background: radial-gradient(circle, rgba(0, 242, 255, 0.15) 0%, transparent 60%);
+  animation: liquidFlow 4s infinite linear reverse;
+}
+
+/* 4. Aurora Glow: Curtains of northern lights */
+.frame-aurora-glow {
+  background: linear-gradient(90deg, #0575e6, #00f260, #0575e6);
+  background-size: 200% auto;
+  padding: 3px;
+  box-shadow: 
+    0 0 25px rgba(0, 242, 96, 0.4),
+    0 0 45px rgba(5, 117, 230, 0.2);
+  animation: rainbowFlow 4s linear infinite;
+}
+
+/* ==========================================================================
+   ANIMATED GRADIATED NAME EFFECTS
+   ========================================================================== */
+
+@keyframes rainbowFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes sunsetFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes oceanFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes neonFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+@keyframes goldFlow {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Animation utilities applied directly on header items or settings elements */
+.name-gradient-sunset {
+  background: NAME_EFFECT_MAP['gradient-sunset'];
+  background-size: 200% auto;
+  animation: sunsetFlow 3s infinite ease-in-out;
+}
+

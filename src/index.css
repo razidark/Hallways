@@ -1,0 +1,13 @@
+/* 
+   HALLWAY: CENTRAL STYLE BRIDGE
+   The core CSS has been modularized for better maintainability.
+   Please edit the specific modules in src/styles/ for major changes:
+   
+   - base.css: Global resets, variables, and themes.
+   - nav.css: Sidebar, Mobile Nav, and Docks.
+   - identity.css: Hexagonal clips, Frames, and Auras.
+   - discovery.css: Reels, Explore grid, and Stories.
+   - components.css: Post elements, Suggestions, and Modals.
+*/
+
+/* Add quick local overrides below this line */

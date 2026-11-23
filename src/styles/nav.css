@@ -1,0 +1,737 @@
+/* ==========================================================================
+   HALLWAY NAVIGATION: SIDEBAR, OVERLAYS & MOBILE
+   Responsive: Desktop > Tablet > Mobile
+   ========================================================================== */
+
+/* ── DESKTOP SIDEBAR ── */
+.vertical-sidebar {
+  width: 72px;
+  height: auto;
+  max-height: 90vh;
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--space-md) 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: visible;
+  transition: all 0.5s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.vertical-sidebar:hover {
+  box-shadow: 0 30px 70px rgba(0,0,0,0.4);
+  border-color: rgba(var(--accent-color-rgb), 0.2);
+}
+
+/* Active nav item — ambient glow (replaces liquid indicator bar) */
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 46px;
+  height: 46px;
+  border-radius: 16px;
+  color: var(--text-primary);
+  transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  cursor: pointer;
+  position: relative;
+  text-decoration: none;
+  transform-style: preserve-3d;
+  perspective: 1000px;
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(var(--bg-secondary-rgb), 0.1);
+  transform: translateY(var(--move-y, 0)) translateX(var(--move-x, 0)) scale(1.1);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+  color: var(--aura-color, var(--accent-color));
+}
+
+.sidebar-nav-item:hover svg {
+  transform: translateZ(20px);
+  filter: drop-shadow(0 5px 10px rgba(var(--accent-color-rgb), 0.2));
+}
+
+.sidebar-nav-item:active {
+  transform: scale(0.95);
+}
+
+.sidebar-nav-item.active {
+  color: var(--aura-color, var(--accent-color));
+  background: rgba(var(--accent-color-rgb), 0.08);
+  box-shadow:
+    0 0 12px rgba(var(--accent-color-rgb), 0.2),
+    0 0 28px rgba(var(--accent-color-rgb), 0.08);
+}
+
+.sidebar-nav-item.active svg {
+  filter: drop-shadow(0 0 6px rgba(var(--accent-color-rgb), 0.4));
+}
+
+.nav-text {
+  position: absolute;
+  left: 100%;
+  margin-left: 20px;
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  color: var(--text-primary);
+  padding: 8px 16px;
+  border-radius: 12px;
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-12px) scale(0.9);
+  transition: all 0.3s cubic-bezier(0.19, 1, 0.22, 1);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.sidebar-nav-item:hover .nav-text {
+  opacity: 1;
+  transform: translateX(0) scale(1);
+}
+
+/* ── OVERLAY PANEL (Search + Notifications) ── */
+.overlay-backdrop {
+  display: none; /* hidden on desktop */
+}
+
+.overlay-panel {
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  height: auto;
+  max-height: 90vh;
+  width: 380px;
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: blur(60px) saturate(180%);
+  backdrop-filter: blur(60px) saturate(180%);
+  border: 1px solid var(--border-color);
+  border-radius: 24px;
+  box-shadow: 0 30px 60px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.05);
+  z-index: 5000;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---------------------------------------------------------------------------
+   Overlay anchoring
+   ---------------------------------------------------------------------------
+   The panel must open on the side of the sidebar that owns the button that
+   launched it:
+     - .overlay-panel-left  -> Search (top of the sidebar). Opens towards the
+       content column, i.e. to the RIGHT of the sidebar.
+     - .overlay-panel-right -> Notifications (bottom group). Opens towards the
+       screen edge, i.e. to the RIGHT of the viewport.
+
+   Both use the same width so the panel does not change size when switching.
+   --------------------------------------------------------------------------- */
+.overlay-panel-left {
+  left: calc(var(--sidebar-width) + 20px);
+  right: auto;
+  max-width: calc(100vw - var(--sidebar-width) - 40px);
+  /* the search engine needs more room than the notification list */
+  width: 460px;
+}
+
+.overlay-panel-right {
+  left: auto;
+  right: 20px;
+  max-width: calc(100vw - var(--sidebar-width) - 40px);
+}
+
+.slide-in-panel {
+  animation: slideInPanel 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+}
+
+.overlay-panel-right.slide-in-panel {
+  animation-name: slideInPanelRight;
+}
+
+/* NOTE: these animations must NOT touch `transform`. The panel is centred
+   with `top: 50%; transform: translateY(-50%)`, and an animation that
+   ends on `transform: translateX(0)` wipes out the translateY(-50%) --
+   which drops the panel far below the fold. Animate `left`/`opacity`
+   instead so the centring transform stays intact. */
+@keyframes slideInPanel {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInPanelRight {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.overlay-panel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 24px 24px 16px;
+  flex-shrink: 0;
+}
+
+.overlay-close-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.overlay-close-btn:hover {
+  background: rgba(255,255,255,0.1);
+  transform: scale(1.05);
+}
+
+.overlay-panel-body {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0 24px 24px;
+}
+
+/* Panel inner containers */
+.search-panel-inner,
+.notifications-panel-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  flex: 1;
+  overflow: hidden;
+}
+
+.notifications-panel-inner {
+  overflow-y: auto;
+}
+
+/* Search result rows */
+.search-result-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.search-result-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* Notification rows */
+.notification-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.notification-row:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+/* ── MOBILE NAV ── */
+.mobile-nav {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  height: 60px;
+  background: var(--bg-secondary);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  backdrop-filter: blur(40px) saturate(200%);
+  border-top: 1px solid var(--border-color);
+  display: none;
+  justify-content: space-around;
+  align-items: center;
+  z-index: var(--z-hud);
+  padding: 0 var(--space-sm);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+.mobile-nav-item {
+  color: var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-decoration: none;
+}
+
+.mobile-nav-item.active { color: var(--accent-color); }
+
+/* Items inside the mobile "More" sheet. */
+.mobile-sheet-item {
+  display: flex;
+  align-items: center;
+  gap: '14px';
+  gap: 14px;
+  padding: 13px 14px;
+  border-radius: 12px;
+  color: var(--text-primary);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.mobile-sheet-item:hover,
+.mobile-sheet-item.active {
+  background: rgba(var(--accent-color-rgb), 0.12);
+  color: var(--accent-color);
+}
+
+.mobile-sheet-item span {
+  margin-left: 0;
+}
+
+.mobile-nav-item.create-btn {
+  background: var(--accent-color);
+  color: white;
+  width: 44px; height: 44px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(var(--accent-color-rgb), 0.3);
+  transform: translateY(-4px);
+}
+
+/* ── FLOATING ACTION DOCK ── */
+.floating-action-dock {
+  position: fixed;
+  bottom: var(--space-lg);
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--accent-color);
+  border: none;
+  border-radius: 50%;
+  width: 56px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 30px rgba(var(--accent-color-rgb), 0.4);
+  z-index: 500;
+  animation: dockRise 0.6s cubic-bezier(0.19, 1, 0.22, 1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.floating-action-dock:hover {
+  transform: translateX(-50%) scale(1.1);
+  box-shadow: 0 12px 40px rgba(var(--accent-color-rgb), 0.6);
+}
+
+.action-pill {
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes dockRise {
+  0% { transform: translate(-50%, 60px); opacity: 0; }
+  100% { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* ── PULSE DOT ── */
+.pulse-dot { position: relative; }
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  top: 0; right: 0;
+  width: 100%; height: 100%;
+  background: inherit;
+  border-radius: inherit;
+  animation: dotPulse 2s infinite ease-out;
+  z-index: -1;
+}
+
+@keyframes dotPulse {
+  0% { transform: scale(1); opacity: 0.8; }
+  100% { transform: scale(2.5); opacity: 0; }
+}
+
+/* ==========================================================================
+   RESPONSIVE BREAKPOINTS — Full Spectrum
+   ========================================================================== */
+
+/* ── LARGE DESKTOP (>1440px) — Comfortable breathing room ── */
+@media (min-width: 1441px) {
+  .immersive-content {
+    gap: 80px;
+  }
+}
+
+/* ── 4K / Ultra-Wide (≥2560px) ── */
+@media (min-width: 2560px) {
+  .vertical-sidebar {
+    width: 84px;
+    border-radius: var(--radius-lg);
+    padding: 28px 0;
+  }
+
+  .sidebar-nav-item {
+    width: 54px;
+    height: 54px;
+    border-radius: 18px;
+  }
+
+  .overlay-panel {
+    width: 440px;
+  }
+  .overlay-panel-right {
+    width: 440px;
+  }
+  .overlay-panel-left {
+    width: 540px;
+  }
+
+  .mobile-nav {
+    height: 70px;
+  }
+
+  .post {
+    margin-bottom: var(--space-xl) !important;
+  }
+
+  .post-image-container {
+    max-height: 85vh;
+  }
+
+  .post-image {
+    max-height: 85vh;
+  }
+
+  .explore-grid {
+    grid-auto-rows: clamp(250px, 18vw, 400px) !important;
+    gap: 6px !important;
+  }
+}
+
+/* ── Super 4K+ (≥3840px) ── */
+@media (min-width: 3840px) {
+  .vertical-sidebar {
+    width: 96px;
+    padding: 32px 0;
+  }
+
+  .sidebar-nav-item {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+  }
+
+  .sidebar-nav-item svg {
+    width: 28px !important;
+    height: 28px !important;
+  }
+
+  .overlay-panel {
+    width: 560px;
+  }
+  .overlay-panel-right {
+    width: 560px;
+  }
+  .overlay-panel-left {
+    width: 660px;
+  }
+
+  .explore-grid {
+    grid-auto-rows: clamp(300px, 14vw, 500px) !important;
+    gap: 8px !important;
+  }
+
+  .post-overlay-container {
+    max-width: 1800px !important;
+  }
+
+  /* Scale message layout */
+  .messages-layout {
+    max-width: 1600px !important;
+  }
+
+  .messages-sidebar {
+    width: 440px;
+  }
+}
+
+/* ── TABLET (≤1200px) ── */
+@media (max-width: 1200px) {
+  .suggestions-column { display: none; }
+  .immersive-content { padding: 0 20px; gap: 30px; }
+  .feed-column { max-width: 100%; }
+}
+
+/* ── SMALL TABLET (≤1024px) ── */
+@media (max-width: 1024px) {
+  .overlay-panel {
+    width: 320px;
+  }
+  .overlay-panel-right {
+    width: 320px;
+  }
+  .overlay-panel-left {
+    width: 380px;
+  }
+  
+  .profile-header {
+    padding: var(--space-lg) !important;
+    gap: var(--space-lg) !important;
+  }
+}
+
+/* ── MOBILE (≤768px) ── */
+@media (max-width: 768px) {
+  /* Show mobile nav, hide desktop nav */
+  .mobile-nav { display: flex; }
+  .sidebar-column { display: none !important; }
+  .floating-action-dock { display: none; }
+  
+  .immersive-content { 
+    padding: 0 var(--space-sm); 
+    gap: 0;
+  }
+  
+  .feed-column { 
+    padding-top: 12px !important; 
+    padding-bottom: 80px !important;
+    max-width: 100% !important;
+  }
+  
+  /* Overlay becomes fullscreen on mobile */
+  .overlay-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    z-index: var(--z-overlay);
+    animation: fadeIn 0.2s ease;
+  }
+
+  .overlay-panel,
+  .overlay-panel-left,
+  .overlay-panel-right {
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    top: auto;
+    bottom: 0;
+    /* cancel the desktop vertical centring -- the sheet is anchored to the
+       bottom edge on small screens */
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    max-height: 85vh;
+    border-right: none;
+    border-top: 1px solid var(--border-color);
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    box-shadow: 0 -10px 40px rgba(0,0,0,0.3);
+  }
+
+  .slide-in-panel,
+  .overlay-panel-right.slide-in-panel,
+  .overlay-panel-left.slide-in-panel {
+    animation: slideUpSheet 0.35s cubic-bezier(0.19, 1, 0.22, 1);
+  }
+
+  @keyframes slideUpSheet {
+    /* opacity only -- animating transform here would override the mobile
+       rule's `transform: none`, which is what cancels the desktop
+       vertical centring. */
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+
+  .overlay-panel-header {
+    padding: 16px 20px 12px;
+  }
+
+  .overlay-panel-header::before {
+    content: "";
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 4px;
+    margin: 0 auto 12px;
+  }
+
+  .overlay-panel-body {
+    padding: 0 16px 16px;
+  }
+
+  /* Posts adapt */
+  .post {
+    border-radius: var(--radius-lg) !important;
+    margin-bottom: var(--space-lg) !important;
+    padding: var(--space-sm) !important;
+  }
+
+  .post-image-container {
+    border-radius: var(--radius-md) !important;
+  }
+  
+  /* Profile header stacks vertically on mobile */
+  .profile-header {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    padding: var(--space-lg) var(--space-md) !important;
+    gap: 20px !important;
+    border-radius: var(--radius-lg) !important;
+    margin-bottom: 24px !important;
+  }
+  
+  .profile-tab-bar {
+    gap: 24px !important;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  
+  .profile-tab-bar::-webkit-scrollbar { display: none; }
+
+  /* Messages layout */
+  .messages-layout {
+    border-radius: 0 !important;
+    height: calc(100vh - 80px) !important;
+    margin: 0 !important;
+    border: none !important;
+    flex-direction: column !important;
+  }
+
+  .messages-sidebar {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 40vh !important;
+    border-right: none !important;
+    border-bottom: 1px solid var(--border-color) !important;
+  }
+
+  .messages-main {
+    flex: 1 !important;
+    min-height: 0 !important;
+  }
+
+  .messages-sidebar.has-active-chat {
+    display: none !important;
+  }
+  
+  /* Reels */
+  .reels-container {
+    height: calc(100vh - 60px);
+  }
+  
+  .reel-viewer {
+    min-height: calc(100vh - 60px);
+  }
+
+  /* Post overlay becomes full-width */
+  .post-overlay-container {
+    flex-direction: column !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    border-radius: 0 !important;
+  }
+
+  .post-overlay-container > div:first-child {
+    height: 45vh !important;
+    flex: none !important;
+  }
+
+  .post-overlay-container > div:last-child {
+    width: 100% !important;
+    flex: 1 !important;
+    border-left: none !important;
+    border-top: 1px solid var(--border-color) !important;
+  }
+}
+
+/* ── SMALL PHONE (≤480px) ── */
+@media (max-width: 480px) {
+  .immersive-content {
+    padding: 0 6px;
+  }
+
+  .feed-column {
+    padding-top: 8px !important;
+  }
+
+  .post {
+    border-radius: var(--radius-md) !important;
+    padding: 6px !important;
+    margin-bottom: 20px !important;
+  }
+
+  .post-image-container {
+    border-radius: var(--radius-sm) !important;
+  }
+
+  .profile-header {
+    padding: 20px 14px !important;
+    border-radius: var(--radius-md) !important;
+  }
+  
+  .overlay-panel {
+    max-height: 92vh;
+  }
+
+  .explore-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    grid-auto-rows: clamp(120px, 40vw, 180px) !important;
+    gap: 3px !important;
+  }
+
+  /* Messages fullscreen on smallest devices */
+  .messages-layout {
+    height: calc(100vh - 60px) !important;
+  }
+
+  /* Post actions shrink */
+  .post-actions svg {
+    width: 22px !important;
+    height: 22px !important;
+  }
+}
+
+/* ── ANIMATION UTIL ── */
+@keyframes slideInPillar {
+  from { transform: translateX(-20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes fadeIn { 
+  from { opacity: 0; } 
+  to { opacity: 1; } 
+}
+
+
+/* The mobile "More" sheet rises from the bottom bar. */
+@keyframes slide-up {
+  from { transform: translateY(12px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}

@@ -1,0 +1,325 @@
+-- Hallways Social Media Platform
+-- Complete Supabase/PostgreSQL Schema
+-- Run this in your Supabase SQL Editor
+
+-- ============================================================
+-- PROFILES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS profiles (
+  id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+  username TEXT UNIQUE,
+  full_name TEXT,
+  avatar_url TEXT,
+  banner_url TEXT,
+  bio TEXT,
+  status TEXT,
+  status_title TEXT DEFAULT 'Creator',
+  profile_aura TEXT DEFAULT 'nebula',
+  border_style TEXT DEFAULT 'normal',
+  avatar_shape TEXT DEFAULT 'hexagon',
+  storage_used BIGINT DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- POSTS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS posts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  image_url TEXT,
+  caption TEXT,
+  filter_class TEXT DEFAULT '',
+  is_reel BOOLEAN DEFAULT false,
+  is_pinned BOOLEAN DEFAULT false,
+  music TEXT,
+  music_url TEXT,
+  repost_id UUID REFERENCES posts(id) ON DELETE SET NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- LIKES
+-- ============================================================
+CREATE TABLE IF NOT EXISTS likes (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(post_id, user_id)
+);
+
+-- ============================================================
+-- SAVES (Bookmarks)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS saves (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(post_id, user_id)
+);
+
+-- ============================================================
+-- COMMENTS (with threaded replies)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS comments (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  post_id UUID REFERENCES posts(id) ON DELETE CASCADE NOT NULL,
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  parent_id UUID REFERENCES comments(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- FOLLOWS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS follows (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  follower_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  following_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(follower_id, following_id)
+);
+
+-- ============================================================
+-- MESSAGES (Whispers)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS messages (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  sender_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  receiver_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  content TEXT,
+  media_url TEXT,
+  media_type TEXT,
+  is_edited BOOLEAN DEFAULT false,
+  read_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- NOTIFICATIONS (Pulse)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS notifications (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  actor_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  type TEXT NOT NULL,
+  target_id UUID,
+  is_read BOOLEAN DEFAULT false,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- STORIES (The Eternal Loop)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS stories (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  media_url TEXT,
+  image_url TEXT,
+  media_type TEXT DEFAULT 'image',
+  caption TEXT,
+  filter_class TEXT DEFAULT '',
+  expires_at TIMESTAMPTZ NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ============================================================
+-- STORY VIEWS
+-- ============================================================
+CREATE TABLE IF NOT EXISTS story_views (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  story_id UUID REFERENCES stories(id) ON DELETE CASCADE NOT NULL,
+  viewer_id UUID REFERENCES profiles(id) ON DELETE CASCADE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE(story_id, viewer_id)
+);
+
+-- ============================================================
+-- INDEXES
+-- ============================================================
+CREATE INDEX IF NOT EXISTS idx_posts_user_id ON posts(user_id);
+CREATE INDEX IF NOT EXISTS idx_posts_created_at ON posts(created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_posts_is_reel ON posts(is_reel) WHERE is_reel = true;
+CREATE INDEX IF NOT EXISTS idx_likes_post_id ON likes(post_id);
+CREATE INDEX IF NOT EXISTS idx_likes_user_id ON likes(user_id);
+CREATE INDEX IF NOT EXISTS idx_comments_post_id ON comments(post_id);
+CREATE INDEX IF NOT EXISTS idx_follows_follower ON follows(follower_id);
+CREATE INDEX IF NOT EXISTS idx_follows_following ON follows(following_id);
+CREATE INDEX IF NOT EXISTS idx_messages_sender ON messages(sender_id);
+CREATE INDEX IF NOT EXISTS idx_messages_receiver ON messages(receiver_id);
+CREATE INDEX IF NOT EXISTS idx_messages_conversation ON messages(sender_id, receiver_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_unread ON notifications(user_id) WHERE is_read = false;
+CREATE INDEX IF NOT EXISTS idx_stories_user ON stories(user_id);
+CREATE INDEX IF NOT EXISTS idx_stories_expires ON stories(expires_at);
+CREATE INDEX IF NOT EXISTS idx_profiles_username ON profiles(username);
+
+-- ============================================================
+-- ROW LEVEL SECURITY (RLS)
+-- ============================================================
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE posts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE likes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE saves ENABLE ROW LEVEL SECURITY;
+ALTER TABLE comments ENABLE ROW LEVEL SECURITY;
+ALTER TABLE follows ENABLE ROW LEVEL SECURITY;
+ALTER TABLE messages ENABLE ROW LEVEL SECURITY;
+ALTER TABLE notifications ENABLE ROW LEVEL SECURITY;
+ALTER TABLE stories ENABLE ROW LEVEL SECURITY;
+ALTER TABLE story_views ENABLE ROW LEVEL SECURITY;
+
+-- Profiles: public read, owner write
+CREATE POLICY "Profiles are publicly readable"
+  ON profiles FOR SELECT USING (true);
+
+CREATE POLICY "Users can update own profile"
+  ON profiles FOR UPDATE USING (auth.uid() = id);
+
+CREATE POLICY "Users can insert own profile"
+  ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+-- Posts: public read, owner write
+CREATE POLICY "Posts are publicly readable"
+  ON posts FOR SELECT USING (true);
+
+CREATE POLICY "Users can create posts"
+  ON posts FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own posts"
+  ON posts FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own posts"
+  ON posts FOR DELETE USING (auth.uid() = user_id);
+
+-- Likes: public read, owner write
+CREATE POLICY "Likes are publicly readable"
+  ON likes FOR SELECT USING (true);
+
+CREATE POLICY "Users can like posts"
+  ON likes FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can unlike posts"
+  ON likes FOR DELETE USING (auth.uid() = user_id);
+
+-- Saves: owner only
+CREATE POLICY "Users can view own saves"
+  ON saves FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can save posts"
+  ON saves FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can unsave posts"
+  ON saves FOR DELETE USING (auth.uid() = user_id);
+
+-- Comments: public read, owner write
+CREATE POLICY "Comments are publicly readable"
+  ON comments FOR SELECT USING (true);
+
+CREATE POLICY "Users can create comments"
+  ON comments FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own comments"
+  ON comments FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own comments"
+  ON comments FOR DELETE USING (auth.uid() = user_id);
+
+-- Follows: public read, owner write
+CREATE POLICY "Follows are publicly readable"
+  ON follows FOR SELECT USING (true);
+
+CREATE POLICY "Users can follow others"
+  ON follows FOR INSERT WITH CHECK (auth.uid() = follower_id);
+
+CREATE POLICY "Users can unfollow others"
+  ON follows FOR DELETE USING (auth.uid() = follower_id);
+
+-- Messages: conversation participants only
+CREATE POLICY "Users can view their messages"
+  ON messages FOR SELECT
+  USING (auth.uid() = sender_id OR auth.uid() = receiver_id);
+
+CREATE POLICY "Users can send messages"
+  ON messages FOR INSERT
+  WITH CHECK (auth.uid() = sender_id);
+
+CREATE POLICY "Users can update own messages"
+  ON messages FOR UPDATE
+  USING (auth.uid() = sender_id);
+
+CREATE POLICY "Users can delete own messages"
+  ON messages FOR DELETE
+  USING (auth.uid() = sender_id);
+
+-- Notifications: owner only
+CREATE POLICY "Users can view own notifications"
+  ON notifications FOR SELECT
+  USING (auth.uid() = user_id);
+
+CREATE POLICY "System can create notifications"
+  ON notifications FOR INSERT
+  WITH CHECK (auth.uid() = actor_id);
+
+CREATE POLICY "Users can update own notifications"
+  ON notifications FOR UPDATE
+  USING (auth.uid() = user_id);
+
+-- Stories: public read, owner write
+CREATE POLICY "Active stories are publicly readable"
+  ON stories FOR SELECT
+  USING (expires_at > NOW());
+
+CREATE POLICY "Users can create own stories"
+  ON stories FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own stories"
+  ON stories FOR DELETE
+  USING (auth.uid() = user_id);
+
+-- Story Views: owner or viewer
+CREATE POLICY "Story views are readable by story owner or viewer"
+  ON story_views FOR SELECT
+  USING (
+    viewer_id = auth.uid()
+    OR story_id IN (SELECT id FROM stories WHERE user_id = auth.uid())
+  );
+
+CREATE POLICY "Users can view stories"
+  ON story_views FOR INSERT
+  WITH CHECK (auth.uid() = viewer_id);
+
+-- ============================================================
+-- AUTOMATIC PROFILE CREATION ON SIGNUP
+-- ============================================================
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.profiles (id, username, full_name, avatar_url)
+  VALUES (
+    NEW.id,
+    COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1)),
+    COALESCE(NEW.raw_user_meta_data->>'full_name', ''),
+    COALESCE(NEW.raw_user_meta_data->>'avatar_url', '')
+  );
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger to create profile on new user signup
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW
+  EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================================
+-- CLEANUP EXPIRED STORIES (optional cron job)
+-- ============================================================
+-- You can set up a Supabase Edge Function or pg_cron to delete
+-- expired stories periodically:
+--
+-- DELETE FROM stories WHERE expires_at < NOW();

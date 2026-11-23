@@ -1,0 +1,5 @@
+/* Instagram Filters via CSS */
+.filter-clarendon { filter: contrast(1.2) saturate(1.35) brightness(1.1) hue-rotate(-5deg); }
+.filter-gingham { filter: brightness(1.05) hue-rotate(-10deg) saturate(0.8) contrast(0.9); }
+.filter-moon { filter: grayscale(1) contrast(1.1) brightness(1.1); }
+.filter-lark { filter: contrast(0.9) saturate(1.1) brightness(1.1) sepia(0.2); }
